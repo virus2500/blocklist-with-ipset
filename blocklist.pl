@@ -2,7 +2,7 @@
 use strict; use warnings;
 ################################################################
 ###### Script to check Blocklist.de list. Block new IP    ###### 
-###### and unblock old delete entrys                      ###### 
+###### and unblock deleted entrys                         ###### 
 ################################################################
 
 ## config ##
@@ -19,7 +19,7 @@ my $rm = "/bin/rm";
 my $wget = "/usr/bin/wget";
 
 ## plain variables ##
-my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $ipRegex, $ipToRegex);
+my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $ipRegex);
 
 my ($added, $removed, $skipped); 
 $added = $removed = $skipped = 0;
@@ -172,16 +172,6 @@ sub cleanup {
 }
 ############### END cleanup ######################
 
-########## ipToRegex ##########
-## converts an ip to regex   ##
-## e.g. 192.168.0.1 to       ##
-##      192\.168\.0\.1       ##
-###############################
-sub ipToRegex {
-    my ($ip) = @_;
-    $ip =~ s/\./\\./g;
-    return "$ip";
-}
 ######## END ipToRegex ########
 
 ############ isIpv4 #############
