@@ -172,8 +172,6 @@ sub cleanup {
 }
 ############### END cleanup ######################
 
-######## END ipToRegex ########
-
 ############ isIpv4 #############
 ## check if given value looks  ##
 ## like an ipv4 ip address     ##
