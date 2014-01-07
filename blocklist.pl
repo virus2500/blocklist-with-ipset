@@ -163,9 +163,9 @@ sub remIpsFromBlocklist {
 ######## END remIpsFromBlocklist ########
 
 
-################## cleanup ###################
-#### Cleanup: move tmp file to new place #####
-##############################################
+########## cleanup ################
+#### Cleanup: delete tmp file #####
+###################################
 sub cleanup {
     $result = `$rm $tmpDir/$fileName && echo "Deleted file $tmpDir/$fileName" || echo "Can\t delete file $tmpDir/$fileName"`;
     print "\nWe added $added, removed $removed, skipped $skipped Rules\n";
