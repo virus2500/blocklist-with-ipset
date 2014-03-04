@@ -10,6 +10,7 @@ my $listUrl = "http://lists.blocklist.de/lists/all.txt";
 my $fileName = "Blocklist.txt";
 my $tmpDir = "/tmp";
 my $file = "$tmpDir/$fileName";
+my $logFile = "/var/log/blocklist";
 
 ## binarys ##
 my $iptables = "/sbin/iptables";
@@ -19,7 +20,7 @@ my $rm = "/bin/rm";
 my $wget = "/usr/bin/wget";
 
 ## plain variables ##
-my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $ipRegex);
+my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $ipRegex, $message);
 
 my ($added, $removed, $skipped); 
 $added = $removed = $skipped = 0;
@@ -32,9 +33,15 @@ my @ipsetArray = ();
 my %ipsetArray;
 my %fileArray;
 
+my $dateTime;
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+my @days = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
+
 #****************************#
 #*********** MAIN ***********#
 #****************************#
+logging("Starting blocklist refresh");
 &iptablesCheck();
 &getFileArray();
 &getIpsetArray();
@@ -61,7 +68,8 @@ sub iptablesCheck {
     ## Do we have an BLOCKLIST/DROP Chain?
     if (`$iptables -L -n | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
     } else {
-        print "Creating Chain BLOCKLIST \n";
+        $message = "Creating Chain BLOCKLIST";
+        logging($message);
         `$iptables -N BLOCKLIST`;
         `$iptables -A BLOCKLIST -m limit --limit 2/min -j LOG --log-prefix "Blocklist Dropped: " --log-level 4`;
         `$iptables -A BLOCKLIST -j DROP`;
@@ -71,14 +79,16 @@ sub iptablesCheck {
     if(`$ipset list -n | $grep blocklist` =~ m/blocklist/) {
     } else {
         `$ipset create blocklist hash:ip hashsize 4096`;
-        print "Created ipset list blocklist\n";
+        $message = "Created ipset list blocklist";
+        logging($message);
     }
     
     ## Is there an forwarded from INPUT to BLOCKLIST?
     if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/) {
     } else {
-        print "Creating forward to BLOCKLIST chain \n";
         `$iptables -I INPUT -m set --match-set blocklist src -j BLOCKLIST`;
+        $message = "Creating forward to BLOCKLIST chain";
+        logging($message);
     }
 }
 
@@ -132,7 +142,8 @@ sub addIpsToBlocklist {
             if ($line eq &isIpv4($line)) { 
                 $result = `$ipset add blocklist $line`;
                 $added++;
-                print "added $line\n"
+                $message = "added $line";
+                logging($message);
             } else {
                 $skipped++;
             }
@@ -151,7 +162,8 @@ sub remIpsFromBlocklist {
         } else {
             if ($line eq &isIpv4($line)) {
                 $result = `$ipset del blocklist $line`;
-                print "removed $line\n";
+                $message = "removed $line";
+                logging($message);
                 $removed++;
             } else {
                 $skipped++;
@@ -163,12 +175,13 @@ sub remIpsFromBlocklist {
 ######## END remIpsFromBlocklist ########
 
 
-########## cleanup ################
-#### Cleanup: delete tmp file #####
-###################################
+################## cleanup ###################
+#### Cleanup: move tmp file to new place #####
+##############################################
 sub cleanup {
     $result = `$rm $tmpDir/$fileName && echo "Deleted file $tmpDir/$fileName" || echo "Can\t delete file $tmpDir/$fileName"`;
-    print "\nWe added $added, removed $removed, skipped $skipped Rules\n";
+    $message = "We added $added, removed $removed, skipped $skipped Rules";
+    logging($message);
 }
 ############### END cleanup ######################
 
@@ -187,4 +200,21 @@ sub isIpv4 {
 }
 ######### END isIpv4 ##########
 
+###### log #######
+## log $message ##
+##################
+sub logging {
+    my ($message) = @_;
+
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+
+    open my $fh, ">>", $logFile
+        or die "Can't open logfile: $!";
+    $dateTime = sprintf("$months[$mon]  %02d %02d:%02d:%02d ", $mday,$hour,$min,$sec);
+    print $fh "$dateTime $message\n";
+    print "$message\n";
+
+    close($fh);
+}
+#### end log #####
 ######### EOF ###########
