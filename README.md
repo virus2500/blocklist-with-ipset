@@ -4,10 +4,12 @@ Use at your own risk :)
 
 Create an ipset based blocklist from an text file (downloaded from e.g. blocklist.de)
 
+V1.0.2: Added a whitelist and blacklist
+
 !!! IMPORTANT !!!!
 You will need to install ipset!
 
-Then open the blocklist.pl with your favorite text Editor and specify why your binarys are located.
+Then open the blocklist.pl with your favorite text Editor and specify where your binarys are located.
 
 (These can be found via "which" e.g. "which iptables")
 

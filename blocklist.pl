@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-use strict; use warnings;
+use strict; 
+use warnings;
 ################################################################
 ###### Script to check Blocklist.de list. Block new IP    ###### 
 ###### and unblock deleted entrys                         ###### 
@@ -11,6 +12,8 @@ my $fileName = "Blocklist.txt";
 my $tmpDir = "/tmp";
 my $file = "$tmpDir/$fileName";
 my $logFile = "/var/log/blocklist";
+my $whiteList = "whitelist.txt";
+my $blackList = "blacklist.txt";
 
 ## binarys ##
 my $iptables = "/sbin/iptables";
@@ -28,8 +31,11 @@ $added = $removed = $skipped = 0;
 ## init arrays ##
 my @fileArray = ();
 my @ipsetArray = ();
-
+my @whiteListArray = ();
+my @blackListArray = ();
 ## init hashes for faster searching
+my %whiteListArray;
+my $blackListArray;
 my %ipsetArray;
 my %fileArray;
 
@@ -43,8 +49,11 @@ my @days = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
 #****************************#
 logging("Starting blocklist refresh");
 &iptablesCheck();
+&getWhiteListArray();
+&getBlackListArray();
 &getFileArray();
 &getIpsetArray();
+print 
 &addIpsToBlocklist();
 &remIpsFromBlocklist();
 &cleanup();
@@ -122,7 +131,6 @@ sub getFileArray {
 sub getIpsetArray {
     $output = `$ipset list blocklist`;
     @ipsetArray = split("\n", $output);
-#    %ipsetArray = map { $_ => 1} @ipsetArray;
     #remove the first 6 Elements of our Array using splice (ipset header info)
     splice @ipsetArray, 0, 6;
     %ipsetArray = map { $_ => 1} split("\n", $output);
@@ -130,13 +138,61 @@ sub getIpsetArray {
 
 ##### END getIpsetArray #########
 
+######### getWhiteListArray ######
+## puts all ips from our        ##
+## $whitelist into              ##
+## array whiteListArray         ##
+##################################
+
+sub getWhiteListArray {
+    open(INFO, $whiteList) or die("Could not open Whitelist.");
+    foreach $line (<INFO>) {
+        push(@whiteListArray, $line);
+    }
+
+    close(INFO);
+    chomp(@whiteListArray);
+}
+##### END getWhiteListArray #####
+
+######### getBlackListArray ######
+## puts all ips from our        ##
+## $whitelist into              ##
+## array blackListArray         ##
+##################################
+
+sub getBlackListArray {
+    open(INFO, $blackList) or die("Could not open Blacklist.");
+    foreach $line (<INFO>) {
+        push(@blackListArray, $line);
+    }
+
+    close(INFO);
+    chomp(@blackListArray);
+}
+##### END getBlackListArray #####
+
 ######## addIpsToBlocklist ######
 ## adds IPs to our blocklist   ##
 #################################
 
 sub addIpsToBlocklist {
+    foreach $line (@blackListArray) {
+        if ((exists $ipsetArray{"$line"}) ||  ($line ~~ @whiteListArray)) {
+	    $skipped++;
+        } else {
+	    if ($line eq &isIpv4($line)) {
+                $result = `$ipset add blocklist $line`;
+                $added++;
+                $message = "added $line";
+                logging($message);
+            } else {
+                $skipped++;
+            }
+	}
+    }
     foreach $line (@fileArray) { 
-        if (exists $ipsetArray{"$line"}) {
+        if ((exists $ipsetArray{"$line"}) || ($line ~~ @whiteListArray)) {
             $skipped++;
         } else {
             if ($line eq &isIpv4($line)) { 
@@ -156,8 +212,22 @@ sub addIpsToBlocklist {
 ## remove IPs from our blocklist   ##
 #####################################
 sub remIpsFromBlocklist {
+    # remove Ips that are in our whiteList
+    foreach $line (@whiteListArray) {
+        if ((exists $ipsetArray{"$line"}) && ($line ~~ @whiteListArray)) {
+            if ($line eq &isIpv4($line)) {
+                $result = `$ipset del blocklist $line`;
+                $message = "removed $line";
+                logging($message);
+                $removed++;
+            } else {
+                $skipped++;
+            }
+        }
+    }
+
     foreach $line (@ipsetArray) {
-        if (exists $fileArray{"$line"}) {
+        if ((exists $fileArray{"$line"}) || ($line ~~ @blackListArray)) {
             $skipped++;   
         } else {
             if ($line eq &isIpv4($line)) {

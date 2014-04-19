@@ -1,0 +1,3 @@
+# IPV4 Whitelist just add ips
+#
+# e.g. 2.2.2.2
