@@ -1,3 +1,3 @@
-# IPV4 Blacklist just add ips whiteout #
+# IPV4/IPV6 Blacklist just add ips whiteout #
 #
 # e.g. 3.3.3.3
