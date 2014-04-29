@@ -198,7 +198,7 @@ sub addIpsToBlocklist {
         } else {
                 $skipped++;
         }
-	}
+	    }
     }
     foreach $line (uniq(@fileArray)) { 
         if ((exists $ipsetArray{"$line"}) || ($line ~~ @whiteListArray)) {
@@ -281,21 +281,6 @@ sub cleanup {
     logging($message);
 }
 ############### END cleanup ######################
-
-############ isIpv4 #############
-## check if given value looks  ##
-## like an ipv4 ip address     ##
-#################################
-sub isIpv4 {
-    my ($isIp) = @_;
-    if ($isIp =~ m/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/) {
-        #print "It's an IPv4\n";
-        return $isIp;
-    } else {
-        return 0;
-    }
-}
-######### END isIpv4 ##########
 
 ###### log #######
 ## log $message ##
