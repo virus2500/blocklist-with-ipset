@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 use strict; 
 use warnings;
+use FindBin '$Bin';
 ################################################################
 ###### Script to check Blocklist.de list. Block new IP    ###### 
 ###### and unblock deleted entrys                         ###### 
@@ -10,8 +11,8 @@ use warnings;
 my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
 my $tmpDir = "/tmp";
 my $logFile = "/var/log/blocklist";
-my $whiteList = "whitelist.txt";
-my $blackList = "blacklist.txt";
+my $whiteList = "$Bin/whitelist.txt";
+my $blackList = "$Bin/blacklist.txt";
 
 ## binarys ##
 my $iptables = "/sbin/iptables";
