@@ -7,6 +7,7 @@ Create an ipset based blocklist from an text file (downloaded from e.g. blocklis
 Changes
 --------
 V1.0.3: Now you can set multiple blocklist sources
+
 V1.0.2: Added a whitelist and blacklist
 
 
