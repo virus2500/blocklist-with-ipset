@@ -2,6 +2,7 @@
 use strict; 
 use warnings;
 use FindBin '$Bin';
+use Data::Validate::IP qw(is_ipv4 is_ipv6);
 ################################################################
 ###### Script to check Blocklist.de list. Block new IP    ###### 
 ###### and unblock deleted entrys                         ###### 
@@ -24,9 +25,8 @@ my $wget = "/usr/bin/wget";
 ## plain variables ##
 my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
 
-my ($added, $removed, $skipped); 
-$added = $removed = $skipped = 0;
-my $count = 0;
+my ($added, $count, $removed, $skipped); 
+$added = $count = $removed = $skipped = 0;
 
 ## init arrays ##
 my @fileArray = ();
@@ -53,7 +53,6 @@ logging("Starting blocklist refresh");
 &getBlackListArray();
 &getFileArray();
 &getIpsetArray();
-print 
 &addIpsToBlocklist();
 &remIpsFromBlocklist();
 &cleanup();
@@ -83,19 +82,20 @@ sub iptablesCheck {
         `$iptables -A BLOCKLIST -m limit --limit 2/min -j LOG --log-prefix "Blocklist Dropped: " --log-level 4`;
         `$iptables -A BLOCKLIST -j DROP`;
     }
-    
     ## Do we have an ipset list called blocklist?
-    if(`$ipset list -n | $grep blocklist` =~ m/blocklist/) {
+    if(`$ipset list -n | $grep blocklist` =~ m/blocklist/ && `$ipset list -n | $grep blocklist` =~ m/blocklist-v6/  ) {
     } else {
         `$ipset create blocklist hash:ip hashsize 4096`;
+        `$ipset create blocklist-v6 hash:ip hashsize 4096 family inet6`;
         $message = "Created ipset list blocklist";
         logging($message);
     }
     
     ## Is there an forwarded from INPUT to BLOCKLIST?
-    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/) {
+    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist-v6/) {
     } else {
         `$iptables -I INPUT -m set --match-set blocklist src -j BLOCKLIST`;
+        `$iptables -I INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
         $message = "Creating forward to BLOCKLIST chain";
         logging($message);
     }
@@ -133,6 +133,7 @@ sub getFileArray {
 
 sub getIpsetArray {
     $output = `$ipset list blocklist`;
+    $output .= `$ipset list blocklist-v6`;
     @ipsetArray = split("\n", $output);
     #remove the first 6 Elements of our Array using splice (ipset header info)
     splice @ipsetArray, 0, 6;
@@ -182,24 +183,34 @@ sub getBlackListArray {
 sub addIpsToBlocklist {
     foreach $line (uniq(@blackListArray)) {
         if ((exists $ipsetArray{"$line"}) ||  ($line ~~ @whiteListArray)) {
-	    $skipped++;
+	        $skipped++;
         } else {
-	    if ($line eq &isIpv4($line)) {
-                $result = `$ipset add blocklist $line`;
-                $added++;
-                $message = "added $line";
-                logging($message);
-            } else {
+	    if (is_ipv4($line)) {
+            $result = `$ipset add blocklist $line`;
+            $added++;
+            $message = "added $line";
+            logging($message);
+        } elsif (is_ipv6($line)) {
+            $result = `$ipset add blocklist-v6 $line`;
+            $added++;
+            $message = "added $line";
+            logging($message);            
+        } else {
                 $skipped++;
-            }
+        }
 	}
     }
     foreach $line (uniq(@fileArray)) { 
         if ((exists $ipsetArray{"$line"}) || ($line ~~ @whiteListArray)) {
             $skipped++;
         } else {
-            if ($line eq &isIpv4($line)) { 
+            if (is_ipv4($line)) {
                 $result = `$ipset add blocklist $line`;
+                $added++;
+                $message = "added $line";
+                logging($message);
+            } elsif (is_ipv6($line)) {
+                $result = `$ipset add blocklist-v6 $line`;
                 $added++;
                 $message = "added $line";
                 logging($message);
@@ -218,11 +229,17 @@ sub remIpsFromBlocklist {
     # remove Ips that are in our whiteList
     foreach $line (@whiteListArray) {
         if ((exists $ipsetArray{"$line"}) && ($line ~~ @whiteListArray)) {
-            if ($line eq &isIpv4($line)) {
+            if (is_ipv4($line)) {
                 $result = `$ipset del blocklist $line`;
                 $message = "removed $line";
                 logging($message);
                 $removed++;
+            } elsif (is_ipv6($line)) {
+                $result = `$ipset del blocklist-v6 $line`;
+                $message = "removed $line";
+                logging($message);
+                $removed++;
+
             } else {
                 $skipped++;
             }
@@ -233,8 +250,13 @@ sub remIpsFromBlocklist {
         if ((exists $fileArray{"$line"}) || ($line ~~ @blackListArray)) {
             $skipped++;   
         } else {
-            if ($line eq &isIpv4($line)) {
+            if (is_ipv4($line)) {
                 $result = `$ipset del blocklist $line`;
+                $message = "removed $line";
+                logging($message);
+                $removed++;
+            } elsif (is_ipv6($line)) {
+                $result = `$ipset del blocklist-v6 $line`;
                 $message = "removed $line";
                 logging($message);
                 $removed++;

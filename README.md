@@ -6,6 +6,8 @@ Create an ipset based blocklist from an text file (downloaded from e.g. blocklis
 
 Changes
 --------
+V1.1.0: Ipset is now IPV6 compatible (Yayyy :) ) 
+
 V1.0.4: Path to white and blacklist is now set automatically
 
 V1.0.3: Now you can set multiple blocklist sources
@@ -14,6 +16,8 @@ V1.0.2: Added a whitelist and blacklist
 
 
 !!! IMPORTANT !!!!
+
+When upgrading from a version lower than 1.1.0 you might have to manually drop duplicated INPUT Rules. 
 
 You will need to install ipset!
 
