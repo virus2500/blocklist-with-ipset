@@ -6,7 +6,7 @@ Create an ipset based blocklist from an text file (downloaded from e.g. blocklis
 
 Changes
 --------
-V1.1.0: Ipset is now IPV6 compatible (Yayyy :) ) 
+V1.1.0: blocklist-with-ipset is now IPV6 compatible (Yayyy :) ) 
 
 V1.0.4: Path to white and blacklist is now set automatically
 
