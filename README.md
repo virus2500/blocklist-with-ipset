@@ -4,6 +4,9 @@ Use at your own risk :)
 
 Create an ipset based blocklist from an text file (downloaded from e.g. blocklist.de)
 
+Changes
+--------
+V1.0.3: Now you can set multiple blocklist sources
 V1.0.2: Added a whitelist and blacklist
 
 

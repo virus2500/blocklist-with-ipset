@@ -8,9 +8,7 @@ use warnings;
 
 ## config ##
 my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
-my $fileName = "Blocklist.txt";
 my $tmpDir = "/tmp";
-my $file = "$tmpDir/$fileName";
 my $logFile = "/var/log/blocklist";
 my $whiteList = "whitelist.txt";
 my $blackList = "blacklist.txt";
