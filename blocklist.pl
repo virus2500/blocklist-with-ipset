@@ -7,7 +7,7 @@ use warnings;
 ################################################################
 
 ## config ##
-my $listUrl = "http://lists.blocklist.de/lists/all.txt";
+my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
 my $fileName = "Blocklist.txt";
 my $tmpDir = "/tmp";
 my $file = "$tmpDir/$fileName";
@@ -23,10 +23,11 @@ my $rm = "/bin/rm";
 my $wget = "/usr/bin/wget";
 
 ## plain variables ##
-my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $ipRegex, $message);
+my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
 
 my ($added, $removed, $skipped); 
 $added = $removed = $skipped = 0;
+my $count = 0;
 
 ## init arrays ##
 my @fileArray = ();
@@ -109,14 +110,17 @@ sub iptablesCheck {
 ## pushes it into an array         ##
 #####################################
 sub getFileArray {
-    `$wget -q -O $tmpDir/$fileName $listUrl && echo "Downloaded temp file to $tmpDir/$fileName" || echo "Can not download file.... stopping"`;
+    foreach $url (@listUrl) {
+        $count++;
+        `$wget -q -O $tmpDir/Blocklist_$count $url && echo "Downloaded temp file to $tmpDir/Blocklist_$count" || echo "Can not download file.... stopping"`;
+    
+        open(INFO, "$tmpDir/Blocklist_$count") or die("Could not open file.");
+        foreach $line (<INFO>) {
+            push(@fileArray, $line);
+        }
 
-    open(INFO, $file) or die("Could not open file.");
-    foreach $line (<INFO>) {
-        push(@fileArray, $line);
+        close(INFO);
     }
-
-    close(INFO);
     chomp(@fileArray);
     %fileArray = map {$_ => 1 } @fileArray;
 }
@@ -177,7 +181,7 @@ sub getBlackListArray {
 #################################
 
 sub addIpsToBlocklist {
-    foreach $line (@blackListArray) {
+    foreach $line (uniq(@blackListArray)) {
         if ((exists $ipsetArray{"$line"}) ||  ($line ~~ @whiteListArray)) {
 	    $skipped++;
         } else {
@@ -191,7 +195,7 @@ sub addIpsToBlocklist {
             }
 	}
     }
-    foreach $line (@fileArray) { 
+    foreach $line (uniq(@fileArray)) { 
         if ((exists $ipsetArray{"$line"}) || ($line ~~ @whiteListArray)) {
             $skipped++;
         } else {
@@ -249,7 +253,9 @@ sub remIpsFromBlocklist {
 #### Cleanup: move tmp file to new place #####
 ##############################################
 sub cleanup {
-    $result = `$rm $tmpDir/$fileName && echo "Deleted file $tmpDir/$fileName" || echo "Can\t delete file $tmpDir/$fileName"`;
+    for (1..$count) {
+        $result = `$rm $tmpDir/Blocklist_$_ && echo "Deleted file $tmpDir/Blocklist_$_" || echo "Can\t delete file $tmpDir/Blocklist_$_"`;
+    }
     $message = "We added $added, removed $removed, skipped $skipped Rules";
     logging($message);
 }
@@ -287,4 +293,7 @@ sub logging {
     close($fh);
 }
 #### end log #####
+
+sub uniq { my %seen; grep !$seen{$_}++, @_ } # from http://stackoverflow.com/questions/13257095/remove-duplicate-values-for-a-key-in-hash
+
 ######### EOF ###########
