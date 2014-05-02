@@ -4,7 +4,9 @@ Use at your own risk :)
 
 Written and tested on Debian Wheezy!
 
-Create an ipset based blocklist from multiple url to an blocklist text file e.g. blocklist.de.
+Create an ipset based blocklist from an url to an blocklist text file e.g. blocklist.de.
+
+As of Version 1.0.3 you can use multiple Sources at once!
 
 Changes
 --------
@@ -18,57 +20,59 @@ Changes
 
 When upgrading from a version lower than 1.1.0 you might have to manually drop duplicated INPUT Rules. 
 
-This should be an time issue though!
+Also you will have to specify where your binarys are located. This settings can be made in blocklist.pl .
+
+(You can find out where your binarys are with "which" e.g. "which iptables")
 
 ## INSTALL ##
 
 1. Make sure you have ipset installed! If not you can usually install it with your distribution software management tool. E.g. apt for Debian/Ubuntu/Mint.
 
-    apt-get install ipset
+		apt-get install ipset
 
 2. Download the ZIP, or Clone the repository, to a folder on your system.
 
 3. Open blocklist.pl with your favorite text editor and set up your blocklist urls. Two are included as default. You can enhance or edit as you like. The destination URL should be an direct link to an Text file though.
 
-      my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
+    	my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
 
-  *You can for example add an list like this*
+	*You can for example add an list like this*
 
-    my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted", "http://www.superblocksite.org/anotherBlocklist.txt");
+		my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted", "http://www.superblocksite.org/anotherBlocklist.txt");
 
 4. While in blocklist.pl verify the location of your binarys. You can verify them with "which". For example 'which ipset' in an Terminal.
 
 
-      my $iptables =  "/sbin/iptables";
-      my $ipset =   "/usr/sbin/ipset";
-      my $grep =    "/bin/grep";
-      my $rm =    "/bin/rm";
-      my $wget =    "/usr/bin/wget";
+    	my $iptables = 	"/sbin/iptables";
+    	my $ipset = 	"/usr/sbin/ipset";
+    	my $grep = 		"/bin/grep";
+    	my $rm = 		"/bin/rm";
+    	my $wget = 		"/usr/bin/wget";
 
 5. Create an cronjob. I have mine in /etc/crontab
 
-    0 */1   * * *   root    /usr/bin/perl /path/to/the/script/blocklist.pl > /dev/null
+		0 */1   * * *   root    /usr/bin/perl /path/to/the/script/blocklist.pl > /dev/null
 
 6. Create an logrotate for the logfile. E.g. under /etc/logrotate.d/blocklist
 
-    /var/log/blocklist
-    {
-        rotate 4
-        daily
-        missingok
-        notifempty
-        delaycompress
-        compress
-    }
+		/var/log/blocklist
+		{
+		    rotate 4
+		    daily
+		    missingok
+		    notifempty
+		    delaycompress
+		    compress
+		}
 
 7. If you have an ip you definitly want to block just put it in blacklist.txt. If you have an IP you definitly never want to have blocked put it in whitelist.txt. This two files are just text lists seperated by new lines. So for example
 
-    #blacklist.txt
-    2.2.2.2
-    3.3.3.3 
+		#blacklist.txt
+		2.2.2.2
+		3.3.3.3 
 
-    #and in whitelist.txt
-    4.4.4.4
-    5.5.5.5
+		#and in whitelist.txt
+		4.4.4.4
+		5.5.5.5
 
 That's it. If you want to manually run the script just cd to the folder where the script is located and run ./blocklist.pl
