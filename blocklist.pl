@@ -10,18 +10,18 @@ use Data::Validate::IP qw(is_ipv4 is_ipv6);
 ################################################################
 
 ## config ##
-my @listUrl         = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
-my $tmpDir          = "/tmp";
-my $logFile         = "/var/log/blocklist";
-my $whiteList       = "$Bin/whitelist.txt";
-my $blackList       = "$Bin/blacklist.txt";
+my @listUrl     = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted");
+my $tmpDir      = "/tmp";
+my $logFile     = "/var/log/blocklist";
+my $whiteList   = "$Bin/whitelist.txt";
+my $blackList   = "$Bin/blacklist.txt";
 
 ## binarys ##
-my $iptables        = "/sbin/iptables";
-my $ipset               = "/usr/sbin/ipset";
-my $grep                = "/bin/grep";
-my $rm                  = "/bin/rm";
-my $wget                = "/usr/bin/wget";
+my $iptables    = "/sbin/iptables";
+my $ipset       = "/usr/sbin/ipset";
+my $grep        = "/bin/grep";
+my $rm          = "/bin/rm";
+my $wget        = "/usr/bin/wget";
 
 ## plain variables ##
 my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
