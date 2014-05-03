@@ -26,8 +26,7 @@ my $wget        = "/usr/bin/wget";
 ## plain variables ##
 my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
 
-my ($added, $count, $removed, $skipped); 
-$added = $count = $removed = $skipped = 0;
+my ($added, $count, $removed, $skipped) = 0; 
 
 ## init arrays ##
 my @fileArray = ();
