@@ -17,11 +17,14 @@ my $whiteList   = "$Bin/whitelist.txt";
 my $blackList   = "$Bin/blacklist.txt";
 
 ## binarys ##
-my $iptables    = "/sbin/iptables";
-my $ipset       = "/usr/sbin/ipset";
-my $grep        = "/bin/grep";
-my $rm          = "/bin/rm";
-my $wget        = "/usr/bin/wget";
+## ! Notice ! Changing these values shouldn't be needed anymore
+## I'll leave it here just in case none of the paths below match.
+$ENV{'PATH'}    = '/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin';
+my $iptables    = "iptables";
+my $ipset       = "ipset";
+my $grep        = "grep";
+my $rm          = "rm";
+my $wget        = "wget";
 
 ## plain variables ##
 my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
@@ -75,6 +78,7 @@ exit;
 sub iptablesCheck {
     ## Do we have an BLOCKLIST/DROP Chain?
     if (`$iptables -L -n | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
+        # Do nothing...
     } else {
         $message = "Creating Chain BLOCKLIST";
         logging($message);
@@ -84,6 +88,7 @@ sub iptablesCheck {
     }
     ## Do we have an ipset list called blocklist?
     if(`$ipset list -n | $grep blocklist` =~ m/blocklist/ && `$ipset list -n | $grep blocklist` =~ m/blocklist-v6/  ) {
+        # Do nothing
     } else {
         `$ipset create blocklist hash:ip hashsize 4096`;
         `$ipset create blocklist-v6 hash:ip hashsize 4096 family inet6`;
@@ -93,6 +98,7 @@ sub iptablesCheck {
         
     ## Is there an forwarded from INPUT to BLOCKLIST?
     if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist-v6/) {
+        # Do nothing
     } else {
         `$iptables -I INPUT -m set --match-set blocklist src -j BLOCKLIST`;
         `$iptables -I INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
