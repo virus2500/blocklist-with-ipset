@@ -10,6 +10,7 @@ As of Version 1.0.3 you can use multiple Sources at once!
 
 Changes
 --------
+- V1.1.1: short Help (-h) and Cleanup (-c) available. Binary should now be found automatically 
 - V1.1.0: blocklist-with-ipset is now IPV6 compatible (Yayyy :) ) 
 - V1.0.4: Path to white and blacklist is now set automatically
 - V1.0.3: Now you can set multiple blocklist sources
@@ -40,20 +41,11 @@ Also you will have to specify where your binarys are located. This settings can 
 
 		my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted", "http://www.superblocksite.org/anotherBlocklist.txt");
 
-4. While in blocklist.pl verify the location of your binarys. You can verify them with "which". For example 'which ipset' in an Terminal.
-
-
-    	my $iptables = 	"/sbin/iptables";
-    	my $ipset = 	"/usr/sbin/ipset";
-    	my $grep = 		"/bin/grep";
-    	my $rm = 		"/bin/rm";
-    	my $wget = 		"/usr/bin/wget";
-
-5. Create an cronjob. I have mine in /etc/crontab
+4. Create an cronjob. I have mine in /etc/crontab
 
 		0 */1   * * *   root    /usr/bin/perl /path/to/the/script/blocklist.pl > /dev/null
 
-6. Create an logrotate for the logfile. E.g. under /etc/logrotate.d/blocklist
+5. Create an logrotate for the logfile. E.g. under /etc/logrotate.d/blocklist
 
 		/var/log/blocklist
 		{
@@ -65,7 +57,7 @@ Also you will have to specify where your binarys are located. This settings can 
 		    compress
 		}
 
-7. If you have an ip you definitly want to block just put it in blacklist.txt. If you have an IP you definitly never want to have blocked put it in whitelist.txt. This two files are just text lists seperated by new lines. So for example
+6. If you have an ip you definitly want to block just put it in blacklist.txt. If you have an IP you definitly never want to have blocked put it in whitelist.txt. This two files are just text lists seperated by new lines. So for example
 
 		#blacklist.txt
 		2.2.2.2
@@ -76,3 +68,7 @@ Also you will have to specify where your binarys are located. This settings can 
 		5.5.5.5
 
 That's it. If you want to manually run the script just cd to the folder where the script is located and run ./blocklist.pl
+
+## CLEANUP ##
+
+If you want to remove the iptables rules

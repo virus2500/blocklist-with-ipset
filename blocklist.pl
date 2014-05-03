@@ -28,9 +28,10 @@ my $rm          = "rm";
 my $wget        = "wget";
 
 ## plain variables ##
-my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message, $ruleNumber, @iptableRules, $iptableRules, %opt, $opt);
+my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message, %opt, $opt);
 
-my ($added, $count, $removed, $skipped) = 0; 
+my ($added, $count, $removed, $skipped);
+$added = $count = $removed = $skipped = 0;
 
 ## init arrays ##
 my @fileArray = ();
