@@ -26,9 +26,9 @@ Also you will have to specify where your binarys are located. This settings can 
 
 ## INSTALL ##
 
-1. Make sure you have ipset installed! If not you can usually install it with your distribution software management tool. E.g. apt for Debian/Ubuntu/Mint.
+1. Make sure you have ipset and the Data::Validate::IP Perl Module installed! If not you can usually install it with your distribution software management tool. E.g. apt for Debian/Ubuntu/Mint.
 
-		apt-get install ipset
+		apt-get install ipset libdata-validate-ip-perl
 
 2. Download the ZIP, or Clone the repository, to a folder on your system.
 
