@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use FindBin '$Bin';
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
+use Getopt::Std;
 ################################################################
 ###### Script to parse a Blocklist list. Block new IP     ######
 ###### and unblock deleted entrys                         ######
@@ -27,7 +28,7 @@ my $rm          = "rm";
 my $wget        = "wget";
 
 ## plain variables ##
-my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message);
+my($row, $Blocklist, $line, $check, $checkLine, $result, $output, $url, $ipRegex, $message, $ruleNumber, @iptableRules, $iptableRules, %opt, $opt);
 
 my ($added, $count, $removed, $skipped) = 0; 
 
@@ -47,20 +48,54 @@ my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
 my @days = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
 
+&init();
+
+############# init ##################
+#### check if we got any options ####
+#### and decide where to go      ####
+#####################################
+
+sub init {
+    $opt = 'hc';
+    getopts( "$opt", \%opt );
+    usage() if $opt{h};
+    cleanupAll() if $opt{c};
+    # else start main subroutine
+    main();
+}
+############## end init #############
+
+############ usage ##################
+#### Some info about this script ####
+#####################################
+sub usage() {
+    print STDERR << "EOF";
+    blocklist-with-ipset
+    
+    This script downloads and parses Text files with IP's and blocks them. 
+    Just run ./blocklist.pl
+    
+    If you want to clean everything up run
+    ./blocklist.pl -c
+EOF
+    exit;
+}
 #****************************#
 #*********** MAIN ***********#
 #****************************#
-logging("Starting blocklist refresh");
-&iptablesCheck();
-&getWhiteListArray();
-&getBlackListArray();
-&getFileArray();
-&getIpsetArray();
-&addIpsToBlocklist();
-&remIpsFromBlocklist();
-&cleanup();
+sub main {
+    logging("Starting blocklist refresh");
+    &iptablesCheck();
+    &getWhiteListArray();
+    &getBlackListArray();
+    &getFileArray();
+    &getIpsetArray();
+    &addIpsToBlocklist();
+    &remIpsFromBlocklist();
+    &cleanup();
 
-exit;
+    exit;
+}
 #***** END MAIN *****#
 
 
@@ -283,6 +318,25 @@ sub cleanup {
     logging($message);
 }
 ############### END cleanup ######################
+
+########### cleanupAll #################
+#### Remove our Rules from iptables ####
+#### and flush our ipset lists      ####
+########################################
+
+sub cleanupAll {
+    if (`$iptables -n -L | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
+        `$iptables -D INPUT -m set --match-set blocklist src -j BLOCKLIST`;
+        `$iptables -D INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
+        `$iptables -F BLOCKLIST`;
+        `$iptables -X BLOCKLIST`;
+        `$ipset destroy blocklist`;
+        `$ipset destroy blocklist-v6`;
+    }
+    exit;
+}
+
+########################################
 
 ###### log #######
 ## log $message ##
