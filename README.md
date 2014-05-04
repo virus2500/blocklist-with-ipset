@@ -17,9 +17,9 @@ Changes
 <br>
 **!!! IMPORTANT !!!!**
 
-When upgrading from a version lower than 1.1.0 you might have to manually drop duplicated INPUT Rules.
+When upgrading from a version lower than 1.1.0 you might have to manually remove duplicated INPUT Rules or run ./blocklist -c . Ignore error messages that might show up.
 
-The script uses various binarys like iptables, ipset. If the script complains that it can't find an specific binary make sure it is in the ENV Path of the script. If not add the path to the binary.
+The script uses various binarys like iptables, ipset. If the script complains that it can't find an specific binary make sure it is in the ENV Path of the script. If not add the path to the ENV Variable.
 
 	$ENV{'PATH'}= '/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin';
 
@@ -43,7 +43,7 @@ The script uses various binarys like iptables, ipset. If the script complains th
 
         my @listUrl = ("http://lists.blocklist.de/lists/all.txt", "http://www.infiltrated.net/blacklisted", "http://www.superblocksite.org/anotherBlocklist.txt");
 
-4. Create an cronjob. I have mine in /etc/crontab
+4. Create an cronjob. I have and hourly cronjob in /etc/crontab
 
         0 */1   * * *   root    /usr/bin/perl /path/to/the/script/blocklist.pl > /dev/null
 
@@ -69,7 +69,9 @@ The script uses various binarys like iptables, ipset. If the script complains th
 		4.4.4.4
 	 	5.5.5.5
 
-That's it. If you want to manually run the script just cd to the folder where the script is located and run ./blocklist.pl
+That's it. If you want to manually run the script just cd to the folder where the script is located and run 
+
+	./blocklist.pl
 
 ## CLEANUP ##
 <br>
