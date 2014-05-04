@@ -73,7 +73,7 @@ sub usage() {
     print STDERR << "EOF";
     blocklist-with-ipset
     
-    This script downloads and parses Text files with IP's and blocks them. 
+    This script downloads and parses Text files with IPs and blocks them. 
     Just run ./blocklist.pl
     
     If you want to clean everything up run
