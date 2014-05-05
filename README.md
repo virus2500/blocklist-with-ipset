@@ -17,17 +17,31 @@ Changes
 <br>
 **!!! IMPORTANT !!!!**
 
-When upgrading from a version lower than 1.1.0 you might have to manually remove duplicated INPUT Rules or run ./blocklist -c . Ignore error messages that might show up.
+When upgrading from a version lower than 1.1.0 you might have to manually remove duplicated INPUT Rules or run
+
+	./blocklist -c
+
+*Ignore error messages that might show up.*
 
 The script uses various binarys like iptables, ipset. If the script complains that it can't find an specific binary make sure it is in the ENV Path of the script. If not add the path to the ENV Variable.
 
 	$ENV{'PATH'}= '/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin';
 
 (You can find out where your binarys are with "which" e.g. "which iptables")
-<br>
 
-## INSTALL ##
+## What it does ##
+This script automatically downloads blocklist from sources you can define (in the blocklist.pl).
+
+Then it will create two ipset lists. One for IPv4 IPs and one for IPv6 IPs.
+
+It will then create an BLOCKLIST iptables chain which logs access attempts from blocked IPs (matched by the ipset lists), to your syslog and DROP the request. Also it will create an forward from your INPUT queue to the BLOCKLIST chain.
+
+Next time you run the script it will check if the IP is allready blocked or needs to be added. Also it will verify if the IP has been removed from your lists and remove it from the ipset as well. 
+
+This can be overruled by an white and blacklist you can define in the corresponding whitelist.xt and blacklist.txt.
+
 <br>
+## INSTALL ##
 
 1. Make sure you have ipset and the Data::Validate::IP Perl Module installed! If not you can usually install it with your distribution software management tool. E.g. apt for Debian/Ubuntu/Mint.
 
@@ -73,8 +87,8 @@ That's it. If you want to manually run the script just cd to the folder where th
 
 	./blocklist.pl
 
-## CLEANUP ##
 <br>
+## CLEANUP ##
 If you want to remove the iptables rules and ipset lists just run
 
 
