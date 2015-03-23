@@ -4,7 +4,7 @@ use warnings;
 use FindBin '$Bin';
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use Getopt::Std;
-no warnings 'experimental::smartmatch';
+no if ($] >= 5.018), 'warnings' => 'experimental::smartmatch';
 ################################################################
 ###### Script to parse a Blocklist list. Block new IP     ######
 ###### and unblock deleted entrys                         ######
@@ -146,7 +146,7 @@ sub iptablesCheck {
     }
         
     ## Is there an forwarded from INPUT to BLOCKLIST in iptables?
-    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist-v6/) {
+    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist/) {
         # Do nothing
     } else {
         `$iptables -I INPUT -m set --match-set blocklist src -j BLOCKLIST`;
