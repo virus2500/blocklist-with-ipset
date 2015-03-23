@@ -4,6 +4,7 @@ use warnings;
 use FindBin '$Bin';
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use Getopt::Std;
+no if ($] >= 5.018), 'warnings' => 'experimental::smartmatch';
 ################################################################
 ###### Script to parse a Blocklist list. Block new IP     ######
 ###### and unblock deleted entrys                         ######
@@ -22,6 +23,7 @@ my $blackList   = "$Bin/blacklist.txt";
 ## I'll leave it here just in case none of the paths below match.
 $ENV{'PATH'}    = '/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin';
 my $iptables    = "iptables";
+my $ip6tables   = "ip6tables";
 my $ipset       = "ipset";
 my $grep        = "grep";
 my $rm          = "rm";
@@ -112,7 +114,7 @@ sub main {
 ###########################################
 
 sub iptablesCheck {
-    ## Do we have an BLOCKLIST/DROP Chain?
+    ## Do we have an BLOCKLIST/DROP Chain in iptables?
     if (`$iptables -L -n | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
         # Do nothing...
     } else {
@@ -121,6 +123,17 @@ sub iptablesCheck {
         `$iptables -N BLOCKLIST`;
         `$iptables -A BLOCKLIST -m limit --limit 2/min -j LOG --log-prefix "Blocklist Dropped: " --log-level 4`;
         `$iptables -A BLOCKLIST -j DROP`;
+    }
+
+    ## Do we have an BLOCKLIST/DROP Chain in ip6tables?
+    if (`$ip6tables -L -n | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
+        # Do nothing...
+    } else {
+        $message = "Creating Chain BLOCKLIST";
+        logging($message);
+        `$ip6tables -N BLOCKLIST`;
+        `$ip6tables -A BLOCKLIST -m limit --limit 2/min -j LOG --log-prefix "Blocklist Dropped: " --log-level 4`;
+        `$ip6tables -A BLOCKLIST -j DROP`;
     }
     ## Do we have an ipset list called blocklist?
     if(`$ipset list -n | $grep blocklist` =~ m/blocklist/ && `$ipset list -n | $grep blocklist` =~ m/blocklist-v6/  ) {
@@ -132,15 +145,23 @@ sub iptablesCheck {
         logging($message);
     }
         
-    ## Is there an forwarded from INPUT to BLOCKLIST?
-    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist-v6/) {
+    ## Is there an forwarded from INPUT to BLOCKLIST in iptables?
+    if (`$iptables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$iptables -L INPUT | $grep BLOCKLIST`=~ m/blocklist/) {
         # Do nothing
     } else {
         `$iptables -I INPUT -m set --match-set blocklist src -j BLOCKLIST`;
-        `$iptables -I INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
         $message = "Creating forward to BLOCKLIST chain";
         logging($message);
     }
+    ## Is there an forwarded from INPUT to BLOCKLIST in ip6tables?
+    if (`$ip6tables -L INPUT | $grep BLOCKLIST`=~ m/BLOCKLIST/ && `$ip6tables -L INPUT | $grep BLOCKLIST`=~ m/blocklist-v6/) {
+        # Do nothing
+    } else {
+        `$ip6tables -I INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
+        $message = "Creating forward to BLOCKLIST chain";
+        logging($message);
+    }
+
 }
 
 ######## END iptablesCheck ########
@@ -328,12 +349,19 @@ sub cleanup {
 sub cleanupAll {
     if (`$iptables -n -L | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
         `$iptables -D INPUT -m set --match-set blocklist src -j BLOCKLIST`;
-        `$iptables -D INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
         `$iptables -F BLOCKLIST`;
         `$iptables -X BLOCKLIST`;
         `$ipset destroy blocklist`;
         `$ipset destroy blocklist-v6`;
     }
+    if (`$ip6tables -n -L | $grep BLOCKLIST` =~ m/Chain BLOCKLIST/) {
+        `$ip6tables -D INPUT -m set --match-set blocklist-v6 src -j BLOCKLIST`;
+        `$ip6tables -F BLOCKLIST`;
+        `$ip6tables -X BLOCKLIST`;
+        `$ipset destroy blocklist`;
+        `$ipset destroy blocklist-v6`;
+    }
+
     exit;
 }
 
