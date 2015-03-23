@@ -9,7 +9,7 @@ This script automatically downloads blocklist from sources you can define (in th
 
 Then it will create two ipset lists. One for IPv4 IPs and one for IPv6 IPs.
 
-It will then create an BLOCKLIST iptables chain which logs access attempts from blocked IPs (matched by the ipset lists), to your syslog and DROP the request. Also it will create an forward from your INPUT queue to the BLOCKLIST chain.
+It will then create an BLOCKLIST iptables/BLOCKLIST ip6tables chain which logs access attempts from blocked IPs (matched by the ipset lists), to your syslog and DROP the request. Also it will create an forward from your INPUT queue to the BLOCKLIST chain.
 
 Next time you run the script it will check if the IP is allready blocked or needs to be added. Also it will verify if the IP has been removed from your lists and remove it from the ipset as well. 
 
@@ -17,6 +17,7 @@ This can be overruled by an white and blacklist you can define in the correspond
 
 Changes
 --------
+- V1.1.2: @kubax: add support for ip6tables (iptables on Arch Linux refuses ipv6 rules)
 - V1.1.1: short Help (-h) and Cleanup (-c) available. Binary should now be found automatically.
 - V1.1.0: blocklist-with-ipset is now IPV6 compatible (Yayyy :) )
 - V1.0.4: Path to white and blacklist is now set automatically
@@ -25,6 +26,10 @@ Changes
 
 <br>
 **!!! IMPORTANT !!!!**
+
+When upgrading to V1.1.2 you might want to manually delete the iptables INPUT BLOCKLIST rule with the target match-set blocklist-v6 src
+
+--
 
 When upgrading from a version lower than 1.1.0 you might have to manually remove duplicated INPUT Rules or run
 
