@@ -139,8 +139,8 @@ sub iptablesCheck {
     if(`$ipset list -n | $grep blocklist` =~ m/blocklist/ && `$ipset list -n | $grep blocklist` =~ m/blocklist-v6/  ) {
         # Do nothing
     } else {
-        `$ipset create blocklist hash:ip hashsize 4096`;
-        `$ipset create blocklist-v6 hash:ip hashsize 4096 family inet6`;
+        `$ipset create blocklist hash:ip hashsize 4096 maxelem 131050`;
+        `$ipset create blocklist-v6 hash:ip hashsize 4096 family inet6 maxelem 131050`;
         $message = "Created ipset list blocklist";
         logging($message);
     }
