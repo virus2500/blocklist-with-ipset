@@ -17,6 +17,7 @@ This can be overruled by an white and blacklist you can define in the correspond
 
 Changes
 --------
+- V1.1.3: @Sheogorath-SI: increase maxelemt to fit more than 65536 entries
 - V1.1.2: @kubax: add support for ip6tables (iptables on Arch Linux refuses ipv6 rules)
 - V1.1.1: short Help (-h) and Cleanup (-c) available. Binary should now be found automatically.
 - V1.1.0: blocklist-with-ipset is now IPV6 compatible (Yayyy :) )
@@ -27,7 +28,7 @@ Changes
 <br>
 **!!! IMPORTANT !!!!**
 
-When upgrading to V1.1.2 you might want to manually delete the iptables INPUT BLOCKLIST rule with the target match-set blocklist-v6 src
+When upgrading to V1.1.2+ you might want to manually delete the iptables INPUT BLOCKLIST rule with the target match-set blocklist-v6 src
 
 --
 
