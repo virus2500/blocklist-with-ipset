@@ -4,7 +4,6 @@ use warnings;
 use FindBin '$Bin';
 use Data::Validate::IP qw(is_ipv4 is_ipv6);
 use Getopt::Std;
-use Data::Dumper;
 no if ($] >= 5.018), 'warnings' => 'experimental::smartmatch';
 ################################################################
 ###### Script to parse a Blocklist list. Block new IP     ######
