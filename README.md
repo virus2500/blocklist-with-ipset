@@ -1,4 +1,4 @@
-blocklist-with-ipset
+blocklist-with-nftables
 ====================
 Use at your own risk :)
 
@@ -13,10 +13,11 @@ It will then create an BLOCKLIST iptables/BLOCKLIST ip6tables chain which logs a
 
 Next time you run the script it will check if the IP is allready blocked or needs to be added. Also it will verify if the IP has been removed from your lists and remove it from the ipset as well. 
 
-This can be overruled by an white and blacklist you can define in the corresponding whitelist.xt and blacklist.txt.
+This can be overruled by an white and blacklist you can define in the corresponding whitelist.xt and blacklist.
 
 Changes
 --------
+- V1.1.4: switch to nftables
 - V1.1.3: @Sheogorath-SI: increase maxelemt to fit more than 65536 entries
 - V1.1.2: @kubax: add support for ip6tables (iptables on Arch Linux refuses ipv6 rules)
 - V1.1.1: short Help (-h) and Cleanup (-c) available. Binary should now be found automatically.
@@ -76,13 +77,13 @@ The script uses various binarys like iptables, ipset. If the script complains th
 			compress
 		}
 
-6. If you have an ip you definitly want to block just put it in blacklist.txt. If you have an IP you definitly never want to have blocked put it in whitelist.txt. This two files are just text lists seperated by new lines. So for example
+6. If you have an ip you definitly want to block just put it in blacklist. If you have an IP you definitly never want to have blocked put it in whitelist. This two files are just text lists seperated by new lines. So for example
 
-		#blacklist.txt
+		#blacklist
 		2.2.2.2
 		3.3.3.3
 
-		#and in whitelist.txt
+		#and in whitelist
 		4.4.4.4
 	 	5.5.5.5
 
@@ -99,6 +100,6 @@ If you want to remove the iptables rules and ipset lists just run
 
 ## Credits ##
 
-kubax: https://github.com/kubax
+virus2500: https://github.com/virus2500
 
 Sheogorath-SI: https://github.com/Sheogorath-SI
