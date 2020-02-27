@@ -1,3 +1,9 @@
+
+[![Abandoned](https://img.shields.io/badge/status-abandoned-red)](https://shields.io/)
+
+This repo is discontinued. I will leave the code up but not work on it anymore.
+
+
 blocklist-with-ipset
 ====================
 Use at your own risk :)
